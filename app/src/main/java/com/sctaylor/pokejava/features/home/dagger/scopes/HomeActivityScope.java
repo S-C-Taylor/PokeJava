@@ -1,0 +1,11 @@
+package com.sctaylor.pokejava.features.home.dagger.scopes;
+
+import javax.inject.Scope;
+
+/**
+ * Created by simon on 12/3/2017.
+ */
+
+@Scope
+public @interface HomeActivityScope {
+}
