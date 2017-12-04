@@ -20,6 +20,7 @@ import com.sctaylor.pokejava.application.network.PokeService;
 import com.sctaylor.pokejava.features.home.dagger.components.DaggerHomeActivityComponent;
 import com.sctaylor.pokejava.features.home.dagger.components.HomeActivityComponent;
 import com.sctaylor.pokejava.features.home.dagger.modules.HomeActivityModule;
+import com.sctaylor.pokejava.features.home.model.Pokemon;
 import com.sctaylor.pokejava.features.home.model.PokemonForm;
 import com.sctaylor.pokejava.features.home.model.PokemonListItem;
 
@@ -72,39 +73,38 @@ public class HomeActivity extends AppCompatActivity {
 
         pokemonList.setAdapter(adapterPokes);
 
-        Call<List<PokemonListItem>> pokemonListCall = pokeService.getPokemonList(151);
+        Call<PokemonListItem> pokemonListCall = pokeService.getPokemonList(151);
 
-        pokemonListCall.enqueue(new Callback<List<PokemonListItem>>() {
+        pokemonListCall.enqueue(new Callback<PokemonListItem>() {
             @Override
-            public void onResponse(Call<List<PokemonListItem>> call, Response<List<PokemonListItem>> response) {
-                
+            public void onResponse(Call<PokemonListItem> call, Response<PokemonListItem> response) {
+                adapterPokes.swapData(response.body().pokemonList);
+
+                for(int i = 1; i <= adapterPokes.getCount(); i++){
+                    Call<PokemonForm> pokemonFormCall = pokeService.getPokemon(i);
+
+                    pokemonFormCall.enqueue(new Callback<PokemonForm>() {
+                        @Override
+                        public void onResponse(Call<PokemonForm> call, Response<PokemonForm> response) {
+                            Timber.i(response.raw().toString());
+                            Timber.i(Integer.toString(response.body().id));
+                            adapterPokes.setItem(response.body().id - 1, response.body());
+                        }
+
+                        @Override
+                        public void onFailure(Call<PokemonForm> call, Throwable t) {
+                            Toast.makeText(HomeActivity.this, "Error getting pokemon " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+
             }
 
             @Override
-            public void onFailure(Call<List<PokemonListItem>> call, Throwable t) {
+            public void onFailure(Call<PokemonListItem> call, Throwable t) {
 
             }
         });
-
-        for(int i = 1; i <= 151; i++){
-            Call<PokemonForm> pokemonFormCall = pokeService.getPokemon(i);
-
-            pokemonFormCall.enqueue(new Callback<PokemonForm>() {
-                @Override
-                public void onResponse(Call<PokemonForm> call, Response<PokemonForm> response) {
-                    Timber.i(response.raw().toString());
-                    Timber.i(Integer.toString(response.body().id));
-                    adapterPokes.addItem(response.body(), response.body().id);
-                }
-
-                @Override
-                public void onFailure(Call<PokemonForm> call, Throwable t) {
-                    Toast.makeText(HomeActivity.this, "Error getting pokemon " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-
     }
 
     @Override

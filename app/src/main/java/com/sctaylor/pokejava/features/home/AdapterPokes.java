@@ -9,9 +9,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sctaylor.pokejava.R;
+import com.sctaylor.pokejava.features.home.model.Pokemon;
 import com.sctaylor.pokejava.features.home.model.PokemonForm;
 import com.squareup.picasso.Picasso;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +47,11 @@ public class AdapterPokes extends BaseAdapter {
         return pokemonList.get(i);
     }
 
+    public void setItem(int i, PokemonForm pokemonForm){
+        pokemonList.set(i, pokemonForm);
+        notifyDataSetChanged();
+    }
+
     @Override
     public long getItemId(int i) {
         return getItem(i).id;
@@ -64,6 +71,16 @@ public class AdapterPokes extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public void swapData(List<Pokemon> list){
+        for(int i = 0; i < list.size(); i++){
+            PokemonForm pokemonForm = new PokemonForm();
+            pokemonForm.pokemon = list.get(i);
+            pokemonForm.id = i + 1;
+            this.pokemonList.add(pokemonForm);
+        }
+        notifyDataSetChanged();
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View pokemonListItem = convertView;
@@ -78,19 +95,24 @@ public class AdapterPokes extends BaseAdapter {
         } else {
 
             pokemonListItemHolder = (PokemonListItemHolder) pokemonListItem.getTag(); //Load holder from memory
+        }
 
+        if(pokemonForm.sprites != null) {
             String sprite = (shinySwitch) ? (pokemonForm.sprites.frontShiny) : (pokemonForm.sprites.frontDefault);
 
             picasso.load(sprite)
                     .into(pokemonListItemHolder.getPokemonImage());
-
-            String pokemonName = pokemonForm.pokemon.name;
-            pokemonName = pokemonName.substring(0, 1).toUpperCase() + pokemonName.substring(1);
-            pokemonListItemHolder.getPokemonName().setText(pokemonName);
-
-            String pokemonId = "#" + pokemonForm.id;
-            pokemonListItemHolder.getPokemonId().setText(pokemonId);
+        }else{
+            pokemonListItemHolder.getPokemonImage().setImageDrawable(null);
         }
+
+        String pokemonName = pokemonForm.pokemon.name;
+        pokemonName = pokemonName.substring(0, 1).toUpperCase() + pokemonName.substring(1);
+        pokemonListItemHolder.getPokemonName().setText(pokemonName);
+
+        String pokemonId = "#" + pokemonForm.id;
+        pokemonListItemHolder.getPokemonId().setText(pokemonId);
+
         return pokemonListItem;
     }
 

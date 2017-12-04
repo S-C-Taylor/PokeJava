@@ -5,11 +5,16 @@ import android.content.Context;
 import com.sctaylor.pokejava.application.dagger.scopes.PokeApplicationScope;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import dagger.Module;
 import dagger.Provides;
 import okhttp3.Cache;
+import okhttp3.CacheControl;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import timber.log.Timber;
 
@@ -22,9 +27,10 @@ public class NetworkModule {
 
     @Provides
     @PokeApplicationScope
-    public OkHttpClient okHttpClient(HttpLoggingInterceptor loggingInterceptor, Cache cache){
+    public OkHttpClient okHttpClient(HttpLoggingInterceptor loggingInterceptor, Cache cache, Interceptor networkInterceptor){
         return new OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)
+                .addNetworkInterceptor(networkInterceptor)
                 .cache(cache)
                 .build();
     }
@@ -40,6 +46,24 @@ public class NetworkModule {
         });
         interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
         return interceptor;
+    }
+
+    @Provides
+    @PokeApplicationScope
+    public Interceptor networkInterceptor(){
+        return new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Response response = chain.proceed( chain.request() );
+                CacheControl cacheControl = new CacheControl.Builder()
+                        .maxAge( 60, TimeUnit.MINUTES )
+                        .build();
+
+                return response.newBuilder()
+                        .header("Cache-Control", cacheControl.toString() )
+                        .build();
+            }
+        };
     }
 
     @Provides

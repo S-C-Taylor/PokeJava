@@ -8,9 +8,13 @@ import com.sctaylor.pokejava.application.network.PokeService;
 
 import org.joda.time.DateTime;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
 import dagger.Module;
 import dagger.Provides;
 import okhttp3.OkHttpClient;
+import retrofit2.CallAdapter;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 

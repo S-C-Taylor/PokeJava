@@ -22,5 +22,5 @@ public interface PokeService {
     Call<PokemonForm> getPokemon(@Path("pokemon") int id);
 
     @GET("pokemon-form")
-    Call<List<PokemonListItem>> getPokemonList(@Query("limit") int limit);
+    Call<PokemonListItem> getPokemonList(@Query("limit") int limit);
 }
